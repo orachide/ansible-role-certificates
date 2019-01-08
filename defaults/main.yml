@@ -1,0 +1,11 @@
+---
+# defaults file for ansible-role-certificates
+
+
+certificates_root_path: /etc/certificates
+certificates_owner: root
+certificates_owner_group: root
+
+certificates_cn: "{{ certificates_common_name | default(ansible_host)}}"
+
+#certificates_ca_cert_file:

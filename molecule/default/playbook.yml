@@ -1,0 +1,6 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: ansible-role-certificates
+      certificates_cn: example.com

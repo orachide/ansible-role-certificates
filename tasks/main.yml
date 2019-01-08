@@ -1,0 +1,41 @@
+---
+# tasks file for ansible-role-certificates
+
+# - package:
+#     name: pyOpenSSL
+#     state: present
+
+- name: Determine Common name
+  set_fact:
+    certificates_current_path: "{{ certificates_root_path }}/{{ certificates_cn }}"
+
+- name: Ensure certificates root path exist
+  file:
+    path: "{{ item }}"
+    owner: "{{ certificates_owner }}"
+    group: "{{ certificates_owner_group }}"
+    state: directory
+    mode: 0444
+  with_items:
+    - "{{ certificates_current_path }}"
+
+- name: Generate private key
+  openssl_privatekey:
+    path: "{{ certificates_current_path }}/privkey.pem"
+    passphrase: "{{ certificates_private_key_passphrase | default(omit) }}"
+    size: "{{ certificates_private_key_size | default(2048) }}"
+    cipher: "{{ certificates_private_key_cipher | default(omit) }}"
+    type: "{{ certificates_private_key_type | default(omit) }}"
+    force: "{{ certificates_private_key_force_regenerate | default(False) }}"
+
+- name: Generate csr
+  openssl_csr:
+    path: "{{ certificates_current_path }}/{{ certificates_cn }}.csr"
+    privatekey_path: "{{ certificates_current_path }}/privkey.pem"
+    privatekey_passphrase: "{{ certificates_private_key_passphrase | default(omit) }}"
+    common_name: "{{ certificates_cn }}"
+    country_name: "{{ certificates_csr_country | default(omit) }}"
+    organization_name: "{{ certificates_csr_organisation_name | default(omit) }}"
+    email_address: "{{ certificates_csr_email | default(omit) }}"
+    subject_alt_name: "{{ certificates_csr_san | default(omit) }}"
+    force: "{{ certificates_csr_force_regenerate | default(False) }}"
